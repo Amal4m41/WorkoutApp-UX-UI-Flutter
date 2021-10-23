@@ -6,10 +6,13 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:workout_app/colors.dart' as color;
+import 'package:workout_app/screens/video_info_screen.dart';
 import 'package:workout_app/utils/constants.dart';
 import 'package:workout_app/utils/widget_functions.dart';
 
 class HomeScreen extends StatefulWidget {
+  static const String id = "homescreen";
+
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -17,13 +20,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List listViewItems = [];
+  List _listViewItems = [];
 
   void _listViewData() async {
-    String jsonValue =
-        await DefaultAssetBundle.of(context).loadString("json/info.json");
-    listViewItems = json.decode(jsonValue);
-    print(listViewItems);
+    //Read the data from the json file.
+    String jsonValue = await DefaultAssetBundle.of(context)
+        .loadString("assets/json/info.json");
+    // await Future.delayed(Duration(seconds: 5), () {
+    //   print("Delayed for 5 seconds");
+    // });
+    setState(() {
+      //convert the json string  data to a list of maps(depending upon the json data).
+      _listViewItems = json.decode(jsonValue);
+    });
+    print(_listViewItems);
   }
 
   @override
@@ -38,7 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: color.AppColor.homePageBackground,
       body: SafeArea(
         child: Container(
-          padding: EdgeInsets.only(left: 25, top: 30, right: 25),
+          padding:
+              const EdgeInsets.only(left: 25, top: 30, right: 25, bottom: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -90,10 +101,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontWeight: FontWeight.w300),
                   ),
                   getHorizontalSpace(5),
-                  const Icon(
-                    Icons.arrow_forward,
-                    color: color.AppColor.homePageIcons,
-                    size: 20,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, VideoInfoScreen.id);
+                    },
+                    child: const Icon(
+                      Icons.arrow_forward,
+                      color: color.AppColor.homePageIcons,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -257,15 +273,39 @@ class _HomeScreenState extends State<HomeScreen> {
               //   text: "Glues",
               // )
               Expanded(
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      child: CardIconText(
-                          imagePath: "$kImagePath/ex1.png", text: "Glues"),
-                    );
-                  },
-                ),
+                child: _listViewItems.isNotEmpty
+                    ? ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        itemCount:
+                            _listViewItems.length ~/ 2, //integer division.
+                        itemBuilder: (BuildContext context, int index) {
+                          int a = index * 2;
+                          int b = index * 2 + 1;
+                          return Row(children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: CardIconText(
+                                  imagePath: _listViewItems[a]["img"],
+                                  text: _listViewItems[a]["title"],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Expanded(
+                                child: CardIconText(
+                                  imagePath: _listViewItems[b]["img"],
+                                  text: _listViewItems[b]["title"],
+                                ),
+                              ),
+                            )
+                          ]);
+                        },
+                      )
+                    : Center(
+                        child: CircularProgressIndicator(),
+                      ),
               )
             ],
           ),
@@ -295,11 +335,14 @@ class CardIconText extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(10).copyWith(top: 15),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
           // color: Colors.red.withOpacity(0.4),
-          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
           boxShadow: [
-            BoxShadow(color: Colors.grey, offset: Offset(0, 0), blurRadius: 10)
+            BoxShadow(
+                color: Colors.grey.withOpacity(0.6),
+                offset: Offset(0, 0),
+                blurRadius: 5)
           ],
           color: Colors.white),
     );

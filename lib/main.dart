@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:workout_app/screens/home_screen.dart';
+import 'package:workout_app/screens/video_info_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,7 +15,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
-      home: HomeScreen(),
+      initialRoute: HomeScreen.id,
+      routes: {
+        HomeScreen.id: (context) => const HomeScreen(),
+        VideoInfoScreen.id: (context) => const VideoInfoScreen(),
+      },
     );
   }
   // @override
