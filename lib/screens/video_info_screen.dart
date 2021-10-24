@@ -22,7 +22,9 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
     String jsonData = await DefaultAssetBundle.of(context)
         .loadString("assets/json/videoinfo.json");
     print(jsonData);
-    _listViewVideoItems = json.decode(jsonData);
+    setState(() {
+      _listViewVideoItems = json.decode(jsonData);
+    });
   }
 
   @override
@@ -112,7 +114,7 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             "Circuit 1 : Legs Toning",
                             style: TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 18),
@@ -120,7 +122,7 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
                           Expanded(
                             child: Container(),
                           ),
-                          Icon(
+                          const Icon(
                             Icons.refresh,
                             color: Colors.blue,
                           ),
@@ -128,19 +130,29 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
                           Text("3  sets")
                         ],
                       ),
-                      // Expanded(
-                      //   child: ListView.builder(
-                      //     itemCount: _listViewVideoItems.length,
-                      //     itemBuilder: (_, int index) {
-                      //       return Expanded(
-                      //         child: VideoListItem(
-                      //           title: _listViewVideoItems[index]["title"],
-                      //           duration: _listViewVideoItems[index]["time"],
-                      //         ),
-                      //       );
-                      //     },
-                      //   ),
-                      // )
+                      getVerticalSpace(20),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _listViewVideoItems.length,
+                          itemBuilder: (_, int index) {
+                            final item = _listViewVideoItems[index];
+                            return GestureDetector(
+                              onTap: () {
+                                debugPrint("Clicked: $index, ${item["title"]}");
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 20),
+                                child: VideoListItem(
+                                  title: item["title"],
+                                  duration: item["time"],
+                                  imagePath: item["thumbnail"],
+                                  restDuration: "15s rest",
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -187,21 +199,37 @@ class TransparentTextCard extends StatelessWidget {
 class VideoListItem extends StatelessWidget {
   final String title;
   final String duration;
+  final String imagePath;
+  final String restDuration;
 
-  VideoListItem({required this.title, required this.duration});
+  VideoListItem(
+      {required this.title,
+      required this.duration,
+      required this.imagePath,
+      required this.restDuration});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      // color: Colors.redAccent,
       child: Column(
         children: [
           Row(
             children: [
-              Image.asset(
-                "assets/images/ex1.png",
-                scale: 10,
+              Container(
+                height: 70,
+                width: 70,
+                decoration: BoxDecoration(
+                  // color: Colors.redAccent,
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  image: DecorationImage(
+                      image: AssetImage(
+                        imagePath,
+                      ),
+                      fit: BoxFit.cover),
+                ),
               ),
-              getHorizontalSpace(10),
+              getHorizontalSpace(12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -209,7 +237,7 @@ class VideoListItem extends StatelessWidget {
                     title,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  getVerticalSpace(15),
+                  getVerticalSpace(12),
                   Text(
                     duration,
                     style: TextStyle(fontSize: 15, color: Colors.grey),
@@ -222,7 +250,42 @@ class VideoListItem extends StatelessWidget {
               //   ],
               // )
             ],
-          )
+          ),
+          getVerticalSpace(20),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                decoration: BoxDecoration(
+                    color: color.AppColor.gradientSecond.withOpacity(0.3),
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: Text(
+                  restDuration,
+                  style: TextStyle(
+                      color: color.AppColor.gradientFirst, fontSize: 12),
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (int i = 0; i < 70; i++)
+                      i.isEven
+                          ? Container(
+                              width: 3,
+                              height: 1,
+                              color: Colors.grey,
+                            )
+                          : Container(
+                              width: 3,
+                              height: 1,
+                              color: Colors.white,
+                            )
+                  ],
+                ),
+              )
+            ],
+          ),
         ],
       ),
     );

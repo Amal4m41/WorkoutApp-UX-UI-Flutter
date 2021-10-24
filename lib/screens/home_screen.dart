@@ -291,9 +291,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Expanded(
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
                                 child: CardIconText(
                                   imagePath: _listViewItems[b]["img"],
                                   text: _listViewItems[b]["title"],
