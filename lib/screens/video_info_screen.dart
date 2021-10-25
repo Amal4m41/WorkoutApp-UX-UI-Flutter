@@ -1,10 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:workout_app/colors.dart' as color;
+import 'package:workout_app/utils/constants.dart';
 import 'package:workout_app/utils/widget_functions.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoInfoScreen extends StatefulWidget {
   static const String id = "videoscreen";
@@ -17,6 +18,9 @@ class VideoInfoScreen extends StatefulWidget {
 
 class _VideoInfoScreenState extends State<VideoInfoScreen> {
   List _listViewVideoItems = [];
+  bool isPlayArea = false;
+  VideoPlayerController? _controller;
+  bool _isPlaying = false;
 
   void _getVideoListData() async {
     String jsonData = await DefaultAssetBundle.of(context)
@@ -51,56 +55,54 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              Container(
-                padding: EdgeInsets.only(left: 25, right: 25, top: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          child: const Icon(
-                            Icons.arrow_back_ios_outlined,
-                            color: Colors.white,
+              isPlayArea
+                  ? Container(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 25, right: 25, bottom: 10),
+                            child: ScreenHeader(),
                           ),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
-                    getVerticalSpace(25),
-                    Text(
-                      "Legs Toning",
-                      style: TextStyle(color: Colors.white, fontSize: 26),
-                    ),
-                    Text(
-                      "and Glutes Workout",
-                      style: TextStyle(color: Colors.white, fontSize: 26),
-                    ),
-                    getVerticalSpace(35),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TransparentTextCard(
-                          text: "min",
-                          icon: Icons.timer_outlined,
-                        ),
-                        TransparentTextCard(
-                          text: "Resistent band, Kettlebell",
-                          icon: Icons.add,
-                        ),
-                      ],
+                          _playView(context),
+                          _controlView(context),
+                        ],
+                      ),
                     )
-                  ],
-                ),
-              ),
-              getVerticalSpace(30),
+                  : Container(
+                      padding: EdgeInsets.only(
+                          left: 25, right: 25, top: 20, bottom: 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ScreenHeader(),
+                          getVerticalSpace(25),
+                          Text(
+                            "Legs Toning",
+                            style: TextStyle(color: Colors.white, fontSize: 26),
+                          ),
+                          Text(
+                            "and Glutes Workout",
+                            style: TextStyle(color: Colors.white, fontSize: 26),
+                          ),
+                          getVerticalSpace(35),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              TransparentTextCard(
+                                text: "min",
+                                icon: Icons.timer_outlined,
+                              ),
+                              TransparentTextCard(
+                                text: "Resistent band, Kettlebell",
+                                icon: Icons.add,
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.only(left: 25, right: 25, top: 30),
@@ -132,26 +134,20 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
                       ),
                       getVerticalSpace(20),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: _listViewVideoItems.length,
-                          itemBuilder: (_, int index) {
-                            final item = _listViewVideoItems[index];
-                            return GestureDetector(
-                              onTap: () {
-                                debugPrint("Clicked: $index, ${item["title"]}");
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 20),
-                                child: VideoListItem(
-                                  title: item["title"],
-                                  duration: item["time"],
-                                  imagePath: item["thumbnail"],
-                                  restDuration: "15s rest",
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                        child: VideoItemsListViewBuilder(
+                            listViewVideoItems: _listViewVideoItems,
+                            onTapItem: (int index) {
+                              var item = _listViewVideoItems[index];
+                              debugPrint("Clicked: $index, ${item["title"]}");
+
+                              if (!isPlayArea) {
+                                setState(() {
+                                  isPlayArea = true;
+                                });
+                              }
+
+                              _InitializeVideoPlayer(item["videoUrl"]);
+                            }),
                       )
                     ],
                   ),
@@ -161,6 +157,129 @@ class _VideoInfoScreenState extends State<VideoInfoScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _controlView(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(30)),
+          color: color.AppColor.gradientFirst.withOpacity(0.2)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          TextButton(
+              onPressed: () {},
+              child: Icon(
+                Icons.fast_rewind,
+                color: Colors.white,
+              )),
+          TextButton(
+              onPressed: () {
+                if (_isPlaying) {
+                  _controller?.pause();
+                } else {
+                  _controller?.play();
+                }
+              },
+              child: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+              )),
+          TextButton(
+              onPressed: () {},
+              child: Icon(
+                Icons.fast_forward,
+                color: Colors.white,
+              ))
+        ],
+      ),
+    );
+  }
+
+  Widget _playView(BuildContext context) {
+    print("CALLED PLAYVIEW");
+    if (_controller != null && _controller!.value.isInitialized) {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: VideoPlayer(_controller!),
+      );
+    } else {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Loading please wait",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+              getHorizontalSpace(10),
+              const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              )
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  void _onControllerUpdate() {
+    if (_controller == null) {
+      debugPrint("controller is null");
+    } else if (!_controller!.value.isInitialized) {
+      debugPrint("controller is not initialized");
+    } else {
+      setState(() {
+        _isPlaying = _controller!.value.isPlaying;
+      });
+      print("isplaying : $_isPlaying");
+    }
+  }
+
+  void _InitializeVideoPlayer(String videoUrl) async {
+    _controller = VideoPlayerController.network(videoUrl);
+    await _controller?.initialize();
+    _controller?.addListener(_onControllerUpdate);
+    _controller?.play();
+    print("$_controller");
+    setState(() {});
+  }
+}
+
+class VideoItemsListViewBuilder extends StatelessWidget {
+  final List listViewVideoItems;
+  final onTapItemCallback onTapItem;
+
+  VideoItemsListViewBuilder({
+    required this.listViewVideoItems,
+    required this.onTapItem,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: listViewVideoItems.length,
+      itemBuilder: (_, int index) {
+        final item = listViewVideoItems[index];
+        return GestureDetector(
+          onTap: () {
+            onTapItem(index);
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: VideoListItem(
+              title: item["title"],
+              duration: item["time"],
+              imagePath: item["thumbnail"],
+              restDuration: "15s rest",
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -288,6 +407,30 @@ class VideoListItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ScreenHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        GestureDetector(
+          child: const Icon(
+            Icons.arrow_back_ios_outlined,
+            color: Colors.white,
+          ),
+          onTap: () {
+            Navigator.pop(context);
+          },
+        ),
+        const Icon(
+          Icons.info_outline,
+          color: Colors.white,
+        ),
+      ],
     );
   }
 }
