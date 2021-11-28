@@ -1,16 +1,26 @@
-# workout_app
+### A UI/UX design of workout app using Flutter 
 
-A new Flutter application.
 
-## Getting Started
+Demo :
+<table>
+<tr>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/demo_gif.gif" height="650"/></td>
+</tr>
+</table>
+<br>
+Screens : 
+<table>
+  <tr>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss1.jpg" height="600"/></td>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss2.jpg" height="600"/></td>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss3.jpg" height="600"/></td>
+  </tr>
+</table>
 
-This project is a starting point for a Flutter application.
+<br>
 
-A few resources to get you started if this is your first Flutter project:
+#### Credits : 
+- This UI design is inspired from [here](https://www.youtube.com/watch?v=svQOxQde0bg&ab_channel=dbestech)
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
