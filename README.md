@@ -11,9 +11,9 @@ Demo :
 Screens : 
 <table>
   <tr>
-    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss1.jpg" height="600"/></td>
-    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss2.jpg" height="600"/></td>
-    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss3.jpg" height="600"/></td>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss1.jpg" height="600" width="300"/></td>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss2.jpg" height="600" width="300"/></td>
+    <td><img src="https://github.com/Amal4m41/WorkoutApp-UX-UI-Flutter/blob/master/ss/ss3.jpg" height="600"width="300"/></td>
   </tr>
 </table>
 
